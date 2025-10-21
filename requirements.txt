@@ -1,0 +1,9 @@
+# Web Scraping
+playwright==1.40.0
+beautifulsoup4==4.12.2
+
+# Data Validation
+pydantic==2.5.0
+
+# Utilities
+python-dotenv==1.0.0
