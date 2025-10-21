@@ -12,8 +12,8 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from car_scraper.scrapers import RMGatherer
-from car_scraper.database import CSVDatabaseManager
+from inventory_gatherer.gatherers import RMGatherer
+from inventory_gatherer.database import CSVDatabaseManager
 
 
 def print_separator(char="=", length=80):

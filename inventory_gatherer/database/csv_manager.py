@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Optional
 from datetime import datetime
 
-from car_scraper.models import CarPosting
+from inventory_gatherer.models import CarPosting
 
 
 class CSVDatabaseManager:

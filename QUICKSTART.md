@@ -1,8 +1,8 @@
 # Quick Start Guide
 
-## MVP Car Scraper - Ready to Run!
+## Inventory Data Gatherer - v1.0
 
-This is a minimal viable product that scrapes https://responsemotors.com/inventory/ and saves results to CSV.
+This is a minimal viable product that gathers data from https://responsemotors.com/inventory/ and saves results to CSV.
 
 ## Installation (One-time setup)
 
@@ -17,43 +17,43 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
-## Running the Scraper
+## Running the Data Gatherer
 
 ```bash
 # Activate virtual environment
 source venv/bin/activate
 
-# Run the scraper
+# Run the application
 python main.py
 ```
 
 ## What It Does
 
-1. Opens the Response Motors inventory page with Playwright
-2. Extracts car listings (title, price, mileage, year, make, model)
+1. Opens the RM inventory page with Playwright
+2. Gathers car listings data (title, price, mileage, year, make, model)
 3. Saves to `car_postings.csv`
 4. Displays results in your terminal
 5. Shows summary statistics (avg price, mileage range, etc.)
 
 ## Output Files
 
-- **car_postings.csv** - Your scraped data
+- **car_postings.csv** - Your gathered data
 - **page_source.html** - HTML source (created if selectors need debugging)
 - **error_screenshot.png** - Screenshot if errors occur
 
-## Customizing the Scraper
+## Customizing the Data Gatherer
 
-If the scraper doesn't find listings, you may need to adjust the selectors:
+If the gatherer doesn't find listings, you may need to adjust the selectors:
 
 1. Run with visible browser to see what's happening:
    ```python
-   # Edit main.py, change line 63 to:
-   scraper = ResponseMotorsScraper(headless=False)
+   # Edit main.py, change line 58 to:
+   gatherer = RMGatherer(headless=False)
    ```
 
 2. Inspect `page_source.html` to find the right selectors
 
-3. Edit `car_scraper/scrapers/response_motors_scraper.py`:
+3. Edit `inventory_gatherer/gatherers/rm_gatherer.py`:
    - **Line 62**: Update `possible_selectors` list
    - **Lines 139-147**: Adjust field extraction selectors
 
@@ -61,23 +61,23 @@ If the scraper doesn't find listings, you may need to adjust the selectors:
 
 ```
 ================================================================================
-Car Scraper - Response Motors
+Car Data Gatherer - RM
 ================================================================================
 
 Database: car_postings.csv
 Existing postings in database: 0
 
-Initializing scraper...
+Initializing data gatherer...
 ================================================================================
-Starting scrape...
+Starting data gathering...
 ================================================================================
 Navigating to https://responsemotors.com/inventory/...
 Waiting for inventory to load...
 Found 24 listings using selector: .vehicle-card
-Successfully scraped 24 listings
+Successfully gathered 24 listings
 ================================================================================
 
-Scraping Complete!
+Data Gathering Complete!
 Found 24 listings
 ================================================================================
 
@@ -85,7 +85,7 @@ Saving to database...
 New postings: 24
 Updated postings: 0
 ================================================================================
-SCRAPED LISTINGS:
+GATHERED LISTINGS:
 ================================================================================
 
 1. 2020 Honda Civic LX

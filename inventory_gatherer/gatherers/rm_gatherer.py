@@ -6,7 +6,7 @@ from typing import List, Optional
 from datetime import datetime
 from playwright.sync_api import sync_playwright, Page, Browser
 
-from car_scraper.models import CarPosting
+from inventory_gatherer.models import CarPosting
 
 
 class RMGatherer:

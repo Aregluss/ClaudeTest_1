@@ -84,10 +84,11 @@ Each vehicle record includes:
 ## Project Structure
 
 ```
-car_scraper/
+inventory_gatherer/
 ├── models/          # Data models and validation
 ├── database/        # Data persistence layer (CSV)
-├── scrapers/        # Data gathering modules
+├── gatherers/       # Data gathering modules
+│   └── rm_gatherer.py
 └── utils/           # Helper utilities
 
 main.py              # Application entry point
@@ -98,7 +99,7 @@ setup.sh            # Automated setup script
 ## Configuration
 
 To adjust data gathering parameters, edit the relevant configuration in:
-- `car_scraper/scrapers/` directory
+- `inventory_gatherer/gatherers/` directory
 
 ## Troubleshooting
 
