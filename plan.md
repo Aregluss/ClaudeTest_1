@@ -1,11 +1,11 @@
-# Car Posting Web Scraper - Architecture & Class Structure
+# Car Posting Data Gatherer - Architecture & Class Structure
 
 ## Overview
-A Python-based web scraper using Playwright to collect car posting data from various websites, with Discord integration for notifications and data sharing.
+A Python-based web gatherer using Playwright to collect car posting data from various websites, with Discord integration for notifications and data sharing.
 
 ## Technology Stack
-- **Python 3.9+**: Core programming language
-- **Playwright**: Web automation and scraping
+- **Python 3.12+**: Core programming language
+- **Playwright**: Web automation and gathering
 - **Discord.py**: Discord bot integration
 - **SQLite/PostgreSQL**: Data storage
 - **python-dotenv**: Environment variable management for secrets
@@ -23,7 +23,7 @@ A Python-based web scraper using Playwright to collect car posting data from var
          │              │              │              │
          ▼              ▼              ▼              ▼
 ┌────────────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐
-│ Scraper Module │ │ Database │ │ Discord  │ │ Config/Auth  │
+│ Gatherer Module │ │ Database │ │ Discord  │ │ Config/Auth  │
 │                │ │  Layer   │ │   Bot    │ │   Manager    │
 └────────────────┘ └──────────┘ └──────────┘ └──────────────┘
 ```
@@ -31,7 +31,7 @@ A Python-based web scraper using Playwright to collect car posting data from var
 ## Project Structure
 
 ```
-car_scraper/
+inventory_gatherer/
 ├── config/
 │   ├── __init__.py
 │   ├── settings.py          # Configuration management
@@ -39,13 +39,13 @@ car_scraper/
 ├── models/
 │   ├── __init__.py
 │   ├── car_posting.py       # CarPosting data model
-│   └── scraper_config.py    # Scraper configuration models
-├── scrapers/
+│   └── gatherer_config.py    # Gatherer configuration models
+├── gatherers/
 │   ├── __init__.py
-│   ├── base_scraper.py      # Abstract base scraper class
-│   ├── autotrader_scraper.py
-│   ├── craigslist_scraper.py
-│   └── facebook_scraper.py
+│   ├── base_gatherer.py      # Abstract base gatherer class
+│   ├── autotrader_gatherer.py
+│   ├── craigslist_gatherer.py
+│   └── facebook_gatherer.py
 ├── database/
 │   ├── __init__.py
 │   ├── db_manager.py        # Database operations
@@ -61,7 +61,7 @@ car_scraper/
 │   └── validators.py       # Data validation utilities
 ├── tests/
 │   ├── __init__.py
-│   ├── test_scrapers.py
+│   ├── test_gatherers.py
 │   ├── test_database.py
 │   └── test_discord_bot.py
 ├── main.py                 # Entry point
@@ -89,9 +89,9 @@ class Settings:
     DATABASE_TYPE: str  # 'sqlite' or 'postgresql'
     DATABASE_URL: str
     
-    # Scraper Configuration
-    SCRAPER_INTERVAL_MINUTES: int
-    MAX_CONCURRENT_SCRAPERS: int
+    # Gatherer Configuration
+    GATHERER_INTERVAL_MINUTES: int
+    MAX_CONCURRENT_GATHERERS: int
     PLAYWRIGHT_HEADLESS: bool
     PLAYWRIGHT_TIMEOUT_MS: int
     
@@ -147,8 +147,8 @@ class CarPosting:
     # Metadata
     posted_date: datetime
     last_updated: datetime
-    first_scraped: datetime
-    last_scraped: datetime
+    first_gathered: datetime
+    last_gathered: datetime
     
     # Additional features
     features: Dict[str, Any]
@@ -169,11 +169,11 @@ class CarPosting:
         pass
 ```
 
-#### `models/scraper_config.py`
+#### `models/gatherer_config.py`
 ```python
-class ScraperConfig:
+class GathererConfig:
     """
-    Configuration for individual scraper instances.
+    Configuration for individual gatherer instances.
     """
     
     platform_name: str
@@ -181,7 +181,7 @@ class ScraperConfig:
     search_url: str
     search_params: Dict[str, Any]
     
-    # Selectors for scraping
+    # Selectors for gathering
     listing_selector: str
     title_selector: str
     price_selector: str
@@ -199,17 +199,17 @@ class ScraperConfig:
     max_year: Optional[int]
 ```
 
-### 3. Web Scraping Layer
+### 3. Web Gathering Layer
 
-#### `scrapers/base_scraper.py`
+#### `gatherers/base_gatherer.py`
 ```python
-class BaseScraper(ABC):
+class BaseGatherer(ABC):
     """
-    Abstract base class for all web scrapers.
+    Abstract base class for all web gatherers.
     Provides common functionality using Playwright.
     """
     
-    def __init__(self, config: ScraperConfig, db_manager: DatabaseManager):
+    def __init__(self, config: GathererConfig, db_manager: DatabaseManager):
         self.config = config
         self.db_manager = db_manager
         self.browser = None
@@ -225,22 +225,22 @@ class BaseScraper(ABC):
         pass
     
     @abstractmethod
-    async def scrape_listing_page(self, url: str) -> List[CarPosting]:
-        """Scrape a single listing page - must be implemented by subclasses"""
+    async def gather_listing_page(self, url: str) -> List[CarPosting]:
+        """Gather a single listing page - must be implemented by subclasses"""
         pass
     
     @abstractmethod
-    async def scrape_detail_page(self, url: str) -> CarPosting:
-        """Scrape detailed information from a posting - must be implemented"""
+    async def gather_detail_page(self, url: str) -> CarPosting:
+        """Gather detailed information from a posting - must be implemented"""
         pass
     
-    async def run_scraper(self) -> List[CarPosting]:
+    async def run_gatherer(self) -> List[CarPosting]:
         """
-        Main scraping workflow:
+        Main gathering workflow:
         1. Initialize browser
         2. Navigate to search page
-        3. Scrape listings
-        4. Scrape details for new/updated listings
+        3. Gather listings
+        4. Gather details for new/updated listings
         5. Store in database
         6. Close browser
         """
@@ -271,19 +271,19 @@ class BaseScraper(ABC):
         pass
 ```
 
-#### `scrapers/autotrader_scraper.py`
+#### `gatherers/autotrader_gatherer.py`
 ```python
-class AutoTraderScraper(BaseScraper):
+class AutoTraderGatherer(BaseGatherer):
     """
     Concrete implementation for AutoTrader website.
     """
     
-    async def scrape_listing_page(self, url: str) -> List[CarPosting]:
-        """AutoTrader-specific listing page scraping"""
+    async def gather_listing_page(self, url: str) -> List[CarPosting]:
+        """AutoTrader-specific listing page gathering"""
         pass
     
-    async def scrape_detail_page(self, url: str) -> CarPosting:
-        """AutoTrader-specific detail page scraping"""
+    async def gather_detail_page(self, url: str) -> CarPosting:
+        """AutoTrader-specific detail page gathering"""
         pass
     
     def _parse_autotrader_price(self, price_text: str) -> float:
@@ -291,19 +291,19 @@ class AutoTraderScraper(BaseScraper):
         pass
 ```
 
-#### `scrapers/craigslist_scraper.py`
+#### `gatherers/craigslist_gatherer.py`
 ```python
-class CraigslistScraper(BaseScraper):
+class CraigslistGatherer(BaseGatherer):
     """
     Concrete implementation for Craigslist.
     """
     
-    async def scrape_listing_page(self, url: str) -> List[CarPosting]:
-        """Craigslist-specific listing page scraping"""
+    async def gather_listing_page(self, url: str) -> List[CarPosting]:
+        """Craigslist-specific listing page gathering"""
         pass
     
-    async def scrape_detail_page(self, url: str) -> CarPosting:
-        """Craigslist-specific detail page scraping"""
+    async def gather_detail_page(self, url: str) -> CarPosting:
+        """Craigslist-specific detail page gathering"""
         pass
 ```
 
@@ -370,9 +370,9 @@ class DatabaseManager:
 
 #### `discord_bot/bot.py`
 ```python
-class CarScraperBot:
+class CarGathererBot:
     """
-    Discord bot for receiving notifications and interacting with scraped data.
+    Discord bot for receiving notifications and interacting with gathered data.
     Bot token is loaded from environment variables for security.
     """
     
@@ -451,7 +451,7 @@ class BotCommands:
     
     async def cmd_stats(self, ctx):
         """
-        Show scraper statistics.
+        Show gatherer statistics.
         Usage: !stats
         """
         pass
@@ -494,7 +494,7 @@ class MessageFormatter:
 
 #### `main.py`
 ```python
-class CarScraperApplication:
+class CarGathererApplication:
     """
     Main application coordinating all components.
     """
@@ -502,11 +502,11 @@ class CarScraperApplication:
     def __init__(self):
         self.settings = Settings.load_from_env()
         self.db_manager = DatabaseManager(self.settings.DATABASE_URL)
-        self.discord_bot = CarScraperBot(
+        self.discord_bot = CarGathererBot(
             self.settings.DISCORD_BOT_TOKEN,
             self.db_manager
         )
-        self.scrapers: List[BaseScraper] = []
+        self.gatherers: List[BaseGatherer] = []
         self.scheduler = None
         self.logger = logging.getLogger(self.__class__.__name__)
     
@@ -515,22 +515,22 @@ class CarScraperApplication:
         Initialize all components:
         1. Load configuration
         2. Connect to database
-        3. Initialize scrapers
+        3. Initialize gatherers
         4. Start Discord bot
         """
         pass
     
-    def register_scraper(self, scraper: BaseScraper):
-        """Register a scraper instance"""
+    def register_gatherer(self, gatherer: BaseGatherer):
+        """Register a gatherer instance"""
         pass
     
-    async def run_all_scrapers(self):
-        """Run all registered scrapers concurrently"""
+    async def run_all_gatherers(self):
+        """Run all registered gatherers concurrently"""
         pass
     
     async def process_new_postings(self, postings: List[CarPosting]):
         """
-        Process newly scraped postings:
+        Process newly gathered postings:
         1. Check for duplicates
         2. Check for price changes
         3. Save to database
@@ -539,7 +539,7 @@ class CarScraperApplication:
         pass
     
     def start_scheduler(self):
-        """Start scheduled scraping tasks"""
+        """Start scheduled gathering tasks"""
         pass
     
     def run(self):
@@ -553,7 +553,7 @@ class CarScraperApplication:
 
 def main():
     """Application entry point"""
-    app = CarScraperApplication()
+    app = CarGathererApplication()
     try:
         app.initialize()
         app.run()
@@ -580,11 +580,11 @@ DISCORD_CHANNEL_ID=1234567890
 
 # Database Configuration
 DATABASE_TYPE=sqlite
-DATABASE_URL=sqlite:///car_scraper.db
+DATABASE_URL=sqlite:///inventory_gatherer.db
 
-# Scraper Settings
-SCRAPER_INTERVAL_MINUTES=60
-MAX_CONCURRENT_SCRAPERS=3
+# Gatherer Settings
+GATHERER_INTERVAL_MINUTES=60
+MAX_CONCURRENT_GATHERERS=3
 PLAYWRIGHT_HEADLESS=true
 PLAYWRIGHT_TIMEOUT_MS=30000
 
@@ -606,9 +606,9 @@ PRICE_DROP_THRESHOLD_PERCENT=5.0
 
 ## Data Flow
 
-1. **Scheduled Scraping**:
-   - Scheduler triggers scraper at configured interval
-   - Scraper initializes Playwright browser
+1. **Scheduled Gathering**:
+   - Scheduler triggers gatherer at configured interval
+   - Gatherer initializes Playwright browser
    - Navigates to car listing websites
    - Extracts car posting data
    - Validates and structures data
@@ -632,7 +632,7 @@ PRICE_DROP_THRESHOLD_PERCENT=5.0
 ## Dependencies (requirements.txt)
 
 ```
-# Web Scraping
+# Web Gathering
 playwright==1.40.0
 beautifulsoup4==4.12.2
 lxml==4.9.3
@@ -675,18 +675,18 @@ mypy==1.7.1
 ## Testing Strategy
 
 1. **Unit Tests**:
-   - Test individual scraper methods
+   - Test individual gatherer methods
    - Test data model validation
    - Test database operations
    - Test Discord message formatting
 
 2. **Integration Tests**:
-   - Test complete scraping workflow
+   - Test complete gathering workflow
    - Test database persistence
    - Test Discord notification delivery
 
 3. **Mock Data**:
-   - Use recorded HTTP responses for scraper tests
+   - Use recorded HTTP responses for gatherer tests
    - Mock Playwright browser for faster tests
    - Mock Discord API calls
 
@@ -699,7 +699,7 @@ mypy==1.7.1
    - Use process manager (systemd/supervisor)
    - Set up monitoring and alerting
 3. **Scaling**:
-   - Run multiple scraper instances
+   - Run multiple gatherer instances
    - Use message queue for notifications
    - Implement caching layer
 
@@ -749,7 +749,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 **Tasks**:
 - [ ] Implement `models/car_posting.py` with Pydantic validation
-- [ ] Implement `models/scraper_config.py`
+- [ ] Implement `models/gatherer_config.py`
 - [ ] Create `config/settings.py` with environment variable loading
 - [ ] Implement settings validation
 - [ ] Create comprehensive `.env.example`
@@ -769,7 +769,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 - test_car_posting_to_dict_round_trip()
 - test_settings_load_from_env()
 - test_settings_validation_errors()
-- test_scraper_config_with_defaults()
+- test_gatherer_config_with_defaults()
 ```
 
 **Acceptance Criteria**:
@@ -826,12 +826,12 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 ---
 
-### Sprint 3: Base Scraper Framework (Week 7-8)
+### Sprint 3: Base Gatherer Framework (Week 7-8)
 
-**Goal**: Create reusable scraper foundation with Playwright
+**Goal**: Create reusable gatherer foundation with Playwright
 
 **Tasks**:
-- [ ] Implement `scrapers/base_scraper.py` abstract class
+- [ ] Implement `gatherers/base_gatherer.py` abstract class
 - [ ] Build browser initialization/cleanup
 - [ ] Implement helper methods (extract_text, extract_number)
 - [ ] Add screenshot capability for debugging
@@ -842,13 +842,13 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 - [ ] Add user agent rotation
 
 **Deliverables**:
-- Complete BaseScraper abstract class
+- Complete BaseGatherer abstract class
 - Helper utilities tested
-- Mock scraper for testing
+- Mock gatherer for testing
 
 **Testing**:
 ```python
-# tests/test_base_scraper.py
+# tests/test_base_gatherer.py
 - test_browser_initialization()
 - test_browser_cleanup()
 - test_extract_text_from_selector()
@@ -861,7 +861,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 ```
 
 **Mock Implementation**:
-- Create `MockScraper` for testing
+- Create `MockGatherer` for testing
 - Use recorded HTML for consistent tests
 
 **Acceptance Criteria**:
@@ -872,31 +872,31 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 ---
 
-### Sprint 4: First Scraper Implementation (Week 9-10)
+### Sprint 4: First Gatherer Implementation (Week 9-10)
 
-**Goal**: Implement one complete scraper (Craigslist - simpler structure)
+**Goal**: Implement one complete gatherer (Craigslist - simpler structure)
 
 **Tasks**:
 - [ ] Research Craigslist HTML structure
-- [ ] Implement `scrapers/craigslist_scraper.py`
-- [ ] Create Craigslist ScraperConfig
-- [ ] Implement `scrape_listing_page()`
-- [ ] Implement `scrape_detail_page()`
+- [ ] Implement `gatherers/craigslist_gatherer.py`
+- [ ] Create Craigslist GathererConfig
+- [ ] Implement `gather_listing_page()`
+- [ ] Implement `gather_detail_page()`
 - [ ] Handle pagination
 - [ ] Parse Craigslist-specific price format
 - [ ] Extract images and metadata
 - [ ] Add error handling for missing fields
 
 **Deliverables**:
-- Working CraigslistScraper
-- Can scrape at least 10 listings
+- Working CraigslistGatherer
+- Can gather at least 10 listings
 - Data persists to database
 
 **Testing**:
 ```python
-# tests/test_craigslist_scraper.py
-- test_scrape_listing_page() # Use saved HTML
-- test_scrape_detail_page()
+# tests/test_craigslist_gatherer.py
+- test_gather_listing_page() # Use saved HTML
+- test_gather_detail_page()
 - test_parse_price_formats()
 - test_pagination_handling()
 - test_handle_missing_images()
@@ -905,12 +905,12 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 ```
 
 **Manual Testing**:
-- Run scraper against live Craigslist
+- Run gatherer against live Craigslist
 - Verify data accuracy manually
 - Check for edge cases (deleted posts, etc.)
 
 **Acceptance Criteria**:
-- Successfully scrapes 100+ listings
+- Successfully gathers 100+ listings
 - All required fields populated
 - Handles errors without crashing
 - Respects rate limits (no 429 errors)
@@ -965,27 +965,27 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 **Goal**: Connect all components and implement notification flow
 
 **Tasks**:
-- [ ] Implement `main.py` CarScraperApplication
-- [ ] Connect scraper → database → Discord flow
+- [ ] Implement `main.py` CarGathererApplication
+- [ ] Connect gatherer → database → Discord flow
 - [ ] Implement `process_new_postings()`
 - [ ] Add price drop notifications
-- [ ] Create scheduler for periodic scraping
+- [ ] Create scheduler for periodic gathering
 - [ ] Implement daily summary feature
 - [ ] Add application health checks
 - [ ] Create startup/shutdown orchestration
 
 **Deliverables**:
 - End-to-end working system
-- Automated scraping on schedule
+- Automated gathering on schedule
 - Notifications firing correctly
 
 **Testing**:
 ```python
 # tests/test_integration.py
-- test_scraper_to_database_flow()
+- test_gatherer_to_database_flow()
 - test_new_posting_triggers_notification()
 - test_price_drop_triggers_alert()
-- test_scheduler_runs_scrapers()
+- test_scheduler_runs_gatherers()
 - test_graceful_shutdown_all_components()
 # End-to-end test with all components
 ```
@@ -1004,13 +1004,13 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 ---
 
-### Sprint 7: Additional Scrapers & Commands (Week 15-16)
+### Sprint 7: Additional Gatherers & Commands (Week 15-16)
 
-**Goal**: Add more scrapers and Discord command functionality
+**Goal**: Add more gatherers and Discord command functionality
 
 **Tasks**:
-- [ ] Implement `scrapers/autotrader_scraper.py`
-- [ ] Implement `scrapers/facebook_scraper.py` (if feasible)
+- [ ] Implement `gatherers/autotrader_gatherer.py`
+- [ ] Implement `gatherers/facebook_gatherer.py` (if feasible)
 - [ ] Create `discord_bot/commands.py`
 - [ ] Implement `!search` command
 - [ ] Implement `!recent` command
@@ -1019,14 +1019,14 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 - [ ] Add help command documentation
 
 **Deliverables**:
-- 2-3 working scrapers
+- 2-3 working gatherers
 - Interactive Discord commands
-- Multi-platform scraping
+- Multi-platform gathering
 
 **Testing**:
 ```python
-# tests/test_autotrader_scraper.py
-# tests/test_facebook_scraper.py
+# tests/test_autotrader_gatherer.py
+# tests/test_facebook_gatherer.py
 # tests/test_bot_commands.py
 - test_search_command_with_filters()
 - test_recent_command()
@@ -1041,7 +1041,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 - Test with various search parameters
 
 **Acceptance Criteria**:
-- All scrapers running concurrently
+- All gatherers running concurrently
 - Commands respond within 3 seconds
 - Search filters work correctly
 - Command help is clear
@@ -1073,9 +1073,9 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 **Testing**:
 ```python
 # tests/test_performance.py
-- test_scrape_1000_listings_performance()
+- test_gather_1000_listings_performance()
 - test_database_query_performance()
-- test_concurrent_scraper_performance()
+- test_concurrent_gatherer_performance()
 - test_memory_usage_stability()
 ```
 
@@ -1091,7 +1091,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 **Acceptance Criteria**:
 - Can handle 10,000+ postings in database
-- Scrapes 500+ listings without errors
+- Gathers 500+ listings without errors
 - Responds to commands in <2 seconds
 - Docker container runs successfully
 - Documentation allows new developer to onboard
@@ -1119,7 +1119,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 - ~5-10 minutes runtime
 
 ### Manual Testing Checklist (Before each sprint demo)
-- [ ] Run scraper against live sites
+- [ ] Run gatherer against live sites
 - [ ] Test Discord notifications in test server
 - [ ] Verify database persistence
 - [ ] Check logs for errors
@@ -1176,9 +1176,9 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 ### High Priority Risks
 
-**Risk**: Website structure changes breaking scrapers
-- **Mitigation**: Design flexible selectors, implement scraper health checks
-- **Monitoring**: Alert on consecutive scraper failures
+**Risk**: Website structure changes breaking gatherers
+- **Mitigation**: Design flexible selectors, implement gatherer health checks
+- **Monitoring**: Alert on consecutive gatherer failures
 
 **Risk**: Discord rate limiting
 - **Mitigation**: Implement notification queuing, respect rate limits
@@ -1207,7 +1207,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 - Code review turnaround time
 
 ### Product Metrics
-- Number of postings scraped per day
+- Number of postings gathered per day
 - Notification accuracy (% of new postings caught)
 - Price drop detection accuracy
 - Discord command usage
@@ -1216,7 +1216,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 ### Quality Metrics
 - Test coverage >90%
 - Zero critical security vulnerabilities
-- <5% error rate in scrapers
+- <5% error rate in gatherers
 - <2 second command response time
 
 ---

@@ -129,7 +129,7 @@ The CSV includes these fields:
 | price | Listed price |
 | description | Additional details |
 | thumbnail_url | Main image URL |
-| scraped_at | Timestamp |
+| gathered_at | Timestamp |
 
 ## Troubleshooting
 
@@ -137,7 +137,7 @@ The CSV includes these fields:
 - The website may have changed its HTML structure
 - Try running with `headless=False` to see the browser
 - Check `page_source.html` to inspect the actual HTML
-- Update selectors in the scraper
+- Update selectors in the gatherer
 
 ### "Module not found" errors
 - Make sure you activated the virtual environment: `source venv/bin/activate`
@@ -148,21 +148,21 @@ The CSV includes these fields:
 
 ## Next Steps
 
-Once the basic scraper works:
+Once the basic gatherer works:
 
-1. **Add more fields**: Edit CarPosting model and scraper
+1. **Add more fields**: Edit CarPosting model and gatherer
 2. **SQLite database**: Replace CSVDatabaseManager with SQLite version
 3. **Price tracking**: Detect price changes on re-runs
 4. **Discord notifications**: Add Discord bot integration
-5. **Scheduling**: Add cron job or systemd service for automated scraping
+5. **Scheduling**: Add cron job or systemd service for automated data gathering
 
 ## Architecture
 
 ```
 main.py
-  ├─> ResponseMotorsScraper (Playwright-based)
+  ├─> RMGatherer (Playwright-based)
   │     ├─> Navigates to website
-  │     ├─> Extracts listings
+  │     ├─> Gathers listings
   │     └─> Returns List[CarPosting]
   │
   └─> CSVDatabaseManager
