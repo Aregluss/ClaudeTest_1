@@ -14,7 +14,7 @@ class CarPosting(BaseModel):
     # Unique identifier
     id: str = Field(..., description="Unique identifier for the posting")
     source_url: str = Field(..., description="URL of the original posting")
-    source_platform: str = Field(default="responsemotors", description="Platform name")
+    source_platform: str = Field(default="rm", description="Platform name")
 
     # Car details
     title: str = Field(..., description="Full title of the listing")
@@ -34,7 +34,7 @@ class CarPosting(BaseModel):
     thumbnail_url: Optional[str] = Field(None, description="Thumbnail image URL")
 
     # Metadata
-    scraped_at: datetime = Field(default_factory=datetime.now, description="When this was scraped")
+    gathered_at: datetime = Field(default_factory=datetime.now, description="When this data was gathered")
 
     # Additional features
     features: Dict[str, Any] = Field(default_factory=dict, description="Additional features/specs")

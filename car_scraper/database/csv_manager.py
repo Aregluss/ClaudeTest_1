@@ -27,7 +27,7 @@ class CSVDatabaseManager:
         self.fieldnames = [
             'id', 'source_url', 'source_platform', 'title', 'make', 'model',
             'year', 'mileage', 'price', 'currency', 'description', 'location',
-            'image_urls', 'thumbnail_url', 'scraped_at', 'features',
+            'image_urls', 'thumbnail_url', 'gathered_at', 'features',
             'condition', 'vin'
         ]
         self._ensure_file_exists()
@@ -111,8 +111,8 @@ class CSVDatabaseManager:
             List of recent CarPosting instances
         """
         all_postings = self.get_all_postings()
-        # Sort by scraped_at descending
-        all_postings.sort(key=lambda p: p.scraped_at, reverse=True)
+        # Sort by gathered_at descending
+        all_postings.sort(key=lambda p: p.gathered_at, reverse=True)
         return all_postings[:limit]
 
     def count_postings(self) -> int:
@@ -149,7 +149,7 @@ class CSVDatabaseManager:
         # Convert complex types to JSON strings
         data['image_urls'] = json.dumps(data.get('image_urls', []))
         data['features'] = json.dumps(data.get('features', {}))
-        data['scraped_at'] = data['scraped_at'].isoformat() if isinstance(data.get('scraped_at'), datetime) else data.get('scraped_at', '')
+        data['gathered_at'] = data['gathered_at'].isoformat() if isinstance(data.get('gathered_at'), datetime) else data.get('gathered_at', '')
 
         # Ensure all fields are present
         row = {field: data.get(field, '') for field in self.fieldnames}
@@ -169,8 +169,8 @@ class CSVDatabaseManager:
             row['features'] = {}
 
         # Parse datetime
-        if row.get('scraped_at'):
-            row['scraped_at'] = datetime.fromisoformat(row['scraped_at'])
+        if row.get('gathered_at'):
+            row['gathered_at'] = datetime.fromisoformat(row['gathered_at'])
 
         # Convert numeric fields
         for field in ['year', 'mileage']:

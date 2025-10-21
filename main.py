@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Car Scraper - Main Entry Point
+Car Data Gatherer - Main Entry Point
 
-Simple web scraper for Response Motors inventory.
-Scrapes listings and stores them in CSV format.
+Data gathering application for RM inventory.
+Gathers listings and stores them in CSV format.
 """
 
 import sys
@@ -12,7 +12,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from car_scraper.scrapers import ResponseMotorsScraper
+from car_scraper.scrapers import RMGatherer
 from car_scraper.database import CSVDatabaseManager
 
 
@@ -45,7 +45,7 @@ def main():
     """Main application entry point"""
 
     print_separator()
-    print("Car Scraper - Response Motors")
+    print("Car Data Gatherer - RM")
     print_separator()
 
     # Initialize database
@@ -53,20 +53,20 @@ def main():
     print(f"\nDatabase: car_postings.csv")
     print(f"Existing postings in database: {db.count_postings()}")
 
-    # Initialize scraper
-    print("\nInitializing scraper...")
-    scraper = ResponseMotorsScraper(headless=True)
+    # Initialize data gatherer
+    print("\nInitializing data gatherer...")
+    gatherer = RMGatherer(headless=True)
 
-    # Scrape listings
+    # Gather listings
     print_separator()
-    print("Starting scrape...")
+    print("Starting data gathering...")
     print_separator()
 
     try:
-        postings = scraper.scrape()
+        postings = gatherer.gather_data()
 
         print_separator()
-        print(f"\nScraping Complete!")
+        print(f"\nData Gathering Complete!")
         print(f"Found {len(postings)} listings")
         print_separator()
 
@@ -93,9 +93,9 @@ def main():
         print(f"New postings: {new_count}")
         print(f"Updated postings: {updated_count}")
 
-        # Display all scraped postings
+        # Display all gathered postings
         print_separator()
-        print("SCRAPED LISTINGS:")
+        print("GATHERED LISTINGS:")
         print_separator()
 
         for idx, posting in enumerate(postings, 1):
@@ -127,7 +127,7 @@ def main():
         print_separator()
 
     except KeyboardInterrupt:
-        print("\n\nScraping interrupted by user.")
+        print("\n\nData gathering interrupted by user.")
         sys.exit(0)
 
     except Exception as e:

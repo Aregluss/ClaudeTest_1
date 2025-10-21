@@ -1,4 +1,4 @@
-"""Scraper for Response Motors inventory"""
+"""Data gatherer for RM inventory"""
 
 import re
 import hashlib
@@ -9,15 +9,15 @@ from playwright.sync_api import sync_playwright, Page, Browser
 from car_scraper.models import CarPosting
 
 
-class ResponseMotorsScraper:
+class RMGatherer:
     """
-    Scraper for responsemotors.com inventory page.
+    Data gatherer for RM (responsemotors.com) inventory page.
     Uses Playwright for dynamic page rendering.
     """
 
     def __init__(self, headless: bool = True, timeout: int = 30000):
         """
-        Initialize scraper.
+        Initialize data gatherer.
 
         Args:
             headless: Run browser in headless mode
@@ -29,9 +29,9 @@ class ResponseMotorsScraper:
         self.browser: Optional[Browser] = None
         self.page: Optional[Page] = None
 
-    def scrape(self) -> List[CarPosting]:
+    def gather_data(self) -> List[CarPosting]:
         """
-        Scrape all car listings from Response Motors inventory.
+        Gather all car listings from RM inventory.
 
         Returns:
             List of CarPosting instances
@@ -55,10 +55,10 @@ class ResponseMotorsScraper:
                 # Extract listings
                 postings = self._extract_listings()
 
-                print(f"Successfully scraped {len(postings)} listings")
+                print(f"Successfully gathered {len(postings)} listings")
 
             except Exception as e:
-                print(f"Error during scraping: {e}")
+                print(f"Error during data gathering: {e}")
                 # Take screenshot for debugging
                 self._take_screenshot("error_screenshot.png")
 
@@ -183,7 +183,7 @@ class ResponseMotorsScraper:
         posting = CarPosting(
             id=posting_id,
             source_url=url,
-            source_platform="responsemotors",
+            source_platform="rm",
             title=title.strip() if title else "Unknown Vehicle",
             make=make,
             model=model,
@@ -194,7 +194,7 @@ class ResponseMotorsScraper:
             description=description,
             thumbnail_url=thumbnail_url,
             image_urls=[thumbnail_url] if thumbnail_url else [],
-            scraped_at=datetime.now()
+            gathered_at=datetime.now()
         )
 
         return posting

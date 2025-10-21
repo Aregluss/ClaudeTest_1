@@ -1,9 +1,23 @@
 #!/bin/bash
-# Setup script for Car Scraper
+# Setup script for Car Data Gatherer
 
 echo "================================"
-echo "Car Scraper - Setup"
+echo "Car Data Gatherer - Setup"
 echo "================================"
+echo ""
+
+# Check Python version
+echo "Checking Python version..."
+python_version=$(python3 --version 2>&1 | awk '{print $2}')
+required_version="3.12"
+
+if ! python3 -c "import sys; exit(0 if sys.version_info >= (3, 12) else 1)" 2>/dev/null; then
+    echo "❌ Error: Python 3.12 or higher is required"
+    echo "   Current version: $python_version"
+    echo "   Please upgrade Python and try again"
+    exit 1
+fi
+echo "✓ Python version $python_version (meets requirement >= 3.12)"
 echo ""
 
 # Check if virtual environment exists
@@ -33,7 +47,7 @@ echo "================================"
 echo "Setup Complete!"
 echo "================================"
 echo ""
-echo "To run the scraper:"
+echo "To run the data gatherer:"
 echo "  source venv/bin/activate"
 echo "  python main.py"
 echo ""

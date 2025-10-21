@@ -4,7 +4,7 @@ A Python application for gathering and analyzing car inventory data from automot
 
 ## Version 1.0 - Features
 
-- Automated data gathering from Response Motors inventory
+- Automated data gathering from RM inventory
 - CSV-based data storage with structured schemas
 - Console-based reporting and statistics
 - Duplicate detection and update tracking
@@ -14,7 +14,7 @@ A Python application for gathering and analyzing car inventory data from automot
 
 ### Prerequisites
 
-- Python 3.9 or higher
+- Python 3.12 or higher
 - macOS, Linux, or Windows with WSL
 - Internet connection
 
@@ -87,7 +87,7 @@ Each vehicle record includes:
 car_scraper/
 ├── models/          # Data models and validation
 ├── database/        # Data persistence layer (CSV)
-├── scrapers/        # Data collection modules
+├── scrapers/        # Data gathering modules
 └── utils/           # Helper utilities
 
 main.py              # Application entry point
@@ -97,8 +97,8 @@ setup.sh            # Automated setup script
 
 ## Configuration
 
-To adjust data collection parameters, edit the relevant configuration in:
-- `car_scraper/scrapers/response_motors_scraper.py`
+To adjust data gathering parameters, edit the relevant configuration in:
+- `car_scraper/scrapers/` directory
 
 ## Troubleshooting
 
@@ -119,7 +119,7 @@ To adjust data collection parameters, edit the relevant configuration in:
 
 **v1.0** (Current)
 - ✅ CSV data storage
-- ✅ Response Motors integration
+- ✅ RM integration
 - ✅ Basic statistics and reporting
 
 **v2.0** (Planned)

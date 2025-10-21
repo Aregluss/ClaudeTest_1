@@ -1,3 +1,3 @@
-from .response_motors_scraper import ResponseMotorsScraper
+from .response_motors_scraper import RMGatherer
 
-__all__ = ["ResponseMotorsScraper"]
+__all__ = ["RMGatherer"]
