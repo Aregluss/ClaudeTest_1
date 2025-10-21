@@ -208,7 +208,7 @@ class ResponseMotorsScraper:
                     text = el.inner_text().strip()
                     if text:
                         return text
-            except:
+            except Exception:
                 continue
         return None
 
