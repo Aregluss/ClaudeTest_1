@@ -703,7 +703,525 @@ mypy==1.7.1
    - Use message queue for notifications
    - Implement caching layer
 
-## Future Enhancements
+## Agile Implementation Plan
+
+### Sprint Overview
+The project is broken down into 8 two-week sprints, each with clear deliverables and integrated testing.
+
+---
+
+### Sprint 0: Project Setup & Infrastructure (Week 1-2)
+
+**Goal**: Establish development environment and CI/CD foundation
+
+**Tasks**:
+- [ ] Initialize Git repository and branch strategy
+- [ ] Set up project structure (directories, `__init__.py` files)
+- [ ] Create `requirements.txt` with initial dependencies
+- [ ] Set up virtual environment
+- [ ] Configure `.env.example` and `.gitignore`
+- [ ] Set up pytest configuration
+- [ ] Configure logging framework (loguru)
+- [ ] Set up code formatting (Black) and linting (Flake8, mypy)
+- [ ] Create basic CI/CD pipeline (GitHub Actions)
+- [ ] Install Playwright and run `playwright install`
+
+**Deliverables**:
+- Working development environment
+- Executable test suite (even if empty)
+- CI pipeline running on commits
+
+**Testing**:
+- Verify all dependencies install correctly
+- Run `pytest` successfully (with placeholder tests)
+- Verify linting and formatting checks pass
+
+**Definition of Done**:
+- Any developer can clone repo and run tests
+- CI pipeline shows green status
+- Documentation on local setup exists
+
+---
+
+### Sprint 1: Core Data Models & Configuration (Week 3-4)
+
+**Goal**: Build validated data models and configuration management
+
+**Tasks**:
+- [ ] Implement `models/car_posting.py` with Pydantic validation
+- [ ] Implement `models/scraper_config.py`
+- [ ] Create `config/settings.py` with environment variable loading
+- [ ] Implement settings validation
+- [ ] Create comprehensive `.env.example`
+- [ ] Build `to_dict()` and `from_dict()` methods
+- [ ] Add `to_discord_embed()` skeleton method
+
+**Deliverables**:
+- Fully validated CarPosting model
+- Configuration system loading from .env
+- 100% test coverage for models
+
+**Testing**:
+```python
+# tests/test_models.py
+- test_car_posting_validation_success()
+- test_car_posting_validation_failures()
+- test_car_posting_to_dict_round_trip()
+- test_settings_load_from_env()
+- test_settings_validation_errors()
+- test_scraper_config_with_defaults()
+```
+
+**Acceptance Criteria**:
+- Invalid data raises validation errors
+- All required fields enforced
+- Settings load from .env correctly
+- Type hints work with mypy
+
+---
+
+### Sprint 2: Database Layer (Week 5-6)
+
+**Goal**: Implement database operations with full CRUD support
+
+**Tasks**:
+- [ ] Design database schema (SQLAlchemy models)
+- [ ] Implement `database/db_manager.py`
+- [ ] Create database migration system (Alembic)
+- [ ] Implement connection pooling
+- [ ] Build CRUD operations for CarPosting
+- [ ] Implement price history tracking
+- [ ] Add database indexes for performance
+- [ ] Create cleanup utility for old postings
+
+**Deliverables**:
+- Working DatabaseManager with SQLite
+- Migration system initialized
+- Tested CRUD operations
+
+**Testing**:
+```python
+# tests/test_database.py
+- test_database_connection()
+- test_create_tables()
+- test_save_new_posting()
+- test_save_duplicate_posting_updates()
+- test_get_posting_by_id()
+- test_get_postings_with_filters()
+- test_price_history_tracking()
+- test_cleanup_old_postings()
+# Use in-memory SQLite for fast tests
+```
+
+**Integration Tests**:
+- Test with both SQLite and PostgreSQL (Docker)
+- Test concurrent access
+- Test transaction rollback
+
+**Acceptance Criteria**:
+- Can save and retrieve postings
+- Price history tracks changes
+- No SQL injection vulnerabilities
+- Tests run in < 5 seconds
+
+---
+
+### Sprint 3: Base Scraper Framework (Week 7-8)
+
+**Goal**: Create reusable scraper foundation with Playwright
+
+**Tasks**:
+- [ ] Implement `scrapers/base_scraper.py` abstract class
+- [ ] Build browser initialization/cleanup
+- [ ] Implement helper methods (extract_text, extract_number)
+- [ ] Add screenshot capability for debugging
+- [ ] Implement duplicate detection logic
+- [ ] Add price change detection
+- [ ] Create retry mechanism for network failures
+- [ ] Implement rate limiting
+- [ ] Add user agent rotation
+
+**Deliverables**:
+- Complete BaseScraper abstract class
+- Helper utilities tested
+- Mock scraper for testing
+
+**Testing**:
+```python
+# tests/test_base_scraper.py
+- test_browser_initialization()
+- test_browser_cleanup()
+- test_extract_text_from_selector()
+- test_extract_number_parsing()
+- test_screenshot_capture()
+- test_duplicate_detection()
+- test_price_change_detection()
+- test_retry_on_network_failure()
+# Use pytest-playwright fixtures
+```
+
+**Mock Implementation**:
+- Create `MockScraper` for testing
+- Use recorded HTML for consistent tests
+
+**Acceptance Criteria**:
+- Browser launches and closes cleanly
+- Helper methods handle missing elements gracefully
+- Retry logic works on failures
+- Memory leaks avoided (browser cleanup)
+
+---
+
+### Sprint 4: First Scraper Implementation (Week 9-10)
+
+**Goal**: Implement one complete scraper (Craigslist - simpler structure)
+
+**Tasks**:
+- [ ] Research Craigslist HTML structure
+- [ ] Implement `scrapers/craigslist_scraper.py`
+- [ ] Create Craigslist ScraperConfig
+- [ ] Implement `scrape_listing_page()`
+- [ ] Implement `scrape_detail_page()`
+- [ ] Handle pagination
+- [ ] Parse Craigslist-specific price format
+- [ ] Extract images and metadata
+- [ ] Add error handling for missing fields
+
+**Deliverables**:
+- Working CraigslistScraper
+- Can scrape at least 10 listings
+- Data persists to database
+
+**Testing**:
+```python
+# tests/test_craigslist_scraper.py
+- test_scrape_listing_page() # Use saved HTML
+- test_scrape_detail_page()
+- test_parse_price_formats()
+- test_pagination_handling()
+- test_handle_missing_images()
+- test_handle_missing_fields()
+# Integration test with real site (optional, tagged @slow)
+```
+
+**Manual Testing**:
+- Run scraper against live Craigslist
+- Verify data accuracy manually
+- Check for edge cases (deleted posts, etc.)
+
+**Acceptance Criteria**:
+- Successfully scrapes 100+ listings
+- All required fields populated
+- Handles errors without crashing
+- Respects rate limits (no 429 errors)
+
+---
+
+### Sprint 5: Discord Bot Foundation (Week 11-12)
+
+**Goal**: Create Discord bot with basic notification capability
+
+**Tasks**:
+- [ ] Implement `discord_bot/bot.py`
+- [ ] Set up Discord bot token in .env
+- [ ] Implement bot startup/shutdown
+- [ ] Create `discord_bot/formatters.py`
+- [ ] Implement `create_posting_embed()`
+- [ ] Implement `send_new_posting_notification()`
+- [ ] Add basic error handling
+- [ ] Test embed formatting
+
+**Deliverables**:
+- Discord bot connects successfully
+- Can send formatted car posting embeds
+- Graceful shutdown implemented
+
+**Testing**:
+```python
+# tests/test_discord_bot.py
+- test_bot_initialization()
+- test_create_posting_embed()
+- test_send_notification() # Mock Discord API
+- test_bot_graceful_shutdown()
+- test_handle_discord_rate_limits()
+```
+
+**Manual Testing**:
+- Create test Discord server
+- Send test notifications
+- Verify embed formatting looks good
+- Test with various posting data
+
+**Acceptance Criteria**:
+- Bot shows online in Discord
+- Embeds display correctly with images
+- No crashes on Discord API errors
+- Rate limiting respected
+
+---
+
+### Sprint 6: Integration & Notifications (Week 13-14)
+
+**Goal**: Connect all components and implement notification flow
+
+**Tasks**:
+- [ ] Implement `main.py` CarScraperApplication
+- [ ] Connect scraper → database → Discord flow
+- [ ] Implement `process_new_postings()`
+- [ ] Add price drop notifications
+- [ ] Create scheduler for periodic scraping
+- [ ] Implement daily summary feature
+- [ ] Add application health checks
+- [ ] Create startup/shutdown orchestration
+
+**Deliverables**:
+- End-to-end working system
+- Automated scraping on schedule
+- Notifications firing correctly
+
+**Testing**:
+```python
+# tests/test_integration.py
+- test_scraper_to_database_flow()
+- test_new_posting_triggers_notification()
+- test_price_drop_triggers_alert()
+- test_scheduler_runs_scrapers()
+- test_graceful_shutdown_all_components()
+# End-to-end test with all components
+```
+
+**Integration Testing**:
+- Run full system for 1 hour
+- Verify notifications sent
+- Check database has new entries
+- Monitor memory usage
+
+**Acceptance Criteria**:
+- System runs autonomously
+- New postings appear in Discord
+- Price drops detected and alerted
+- No memory leaks over 24 hours
+
+---
+
+### Sprint 7: Additional Scrapers & Commands (Week 15-16)
+
+**Goal**: Add more scrapers and Discord command functionality
+
+**Tasks**:
+- [ ] Implement `scrapers/autotrader_scraper.py`
+- [ ] Implement `scrapers/facebook_scraper.py` (if feasible)
+- [ ] Create `discord_bot/commands.py`
+- [ ] Implement `!search` command
+- [ ] Implement `!recent` command
+- [ ] Implement `!watch` command
+- [ ] Implement `!stats` command
+- [ ] Add help command documentation
+
+**Deliverables**:
+- 2-3 working scrapers
+- Interactive Discord commands
+- Multi-platform scraping
+
+**Testing**:
+```python
+# tests/test_autotrader_scraper.py
+# tests/test_facebook_scraper.py
+# tests/test_bot_commands.py
+- test_search_command_with_filters()
+- test_recent_command()
+- test_watch_command()
+- test_stats_command()
+- test_invalid_command_handling()
+```
+
+**User Acceptance Testing**:
+- Have users test Discord commands
+- Gather feedback on UX
+- Test with various search parameters
+
+**Acceptance Criteria**:
+- All scrapers running concurrently
+- Commands respond within 3 seconds
+- Search filters work correctly
+- Command help is clear
+
+---
+
+### Sprint 8: Polish, Optimization & Documentation (Week 17-18)
+
+**Goal**: Production readiness and documentation
+
+**Tasks**:
+- [ ] Performance optimization (database queries, async operations)
+- [ ] Add comprehensive error handling
+- [ ] Implement monitoring/logging
+- [ ] Create Docker containerization
+- [ ] Write deployment documentation
+- [ ] Create user guide for Discord commands
+- [ ] Add administrator documentation
+- [ ] Security audit (secrets, rate limiting, input validation)
+- [ ] Load testing
+- [ ] Create backup/restore procedures
+
+**Deliverables**:
+- Production-ready application
+- Complete documentation
+- Docker deployment option
+- Performance benchmarks
+
+**Testing**:
+```python
+# tests/test_performance.py
+- test_scrape_1000_listings_performance()
+- test_database_query_performance()
+- test_concurrent_scraper_performance()
+- test_memory_usage_stability()
+```
+
+**Production Readiness Checklist**:
+- [ ] All tests passing (>90% coverage)
+- [ ] No security vulnerabilities
+- [ ] Error handling comprehensive
+- [ ] Logging structured and useful
+- [ ] Monitoring dashboards created
+- [ ] Documentation complete
+- [ ] Backup procedures tested
+- [ ] Rollback plan documented
+
+**Acceptance Criteria**:
+- Can handle 10,000+ postings in database
+- Scrapes 500+ listings without errors
+- Responds to commands in <2 seconds
+- Docker container runs successfully
+- Documentation allows new developer to onboard
+
+---
+
+## Testing Strategy by Type
+
+### Unit Tests (Run on every commit)
+- Fast (<5 seconds total)
+- Mock all external dependencies
+- 90%+ code coverage target
+- Use pytest fixtures for common setup
+
+### Integration Tests (Run on PR)
+- Test component interactions
+- Use Docker for external services (PostgreSQL, Discord mock)
+- Test real Playwright browser
+- ~1-2 minutes runtime
+
+### End-to-End Tests (Run nightly)
+- Full system test
+- May use real websites (with caution)
+- Verify complete workflows
+- ~5-10 minutes runtime
+
+### Manual Testing Checklist (Before each sprint demo)
+- [ ] Run scraper against live sites
+- [ ] Test Discord notifications in test server
+- [ ] Verify database persistence
+- [ ] Check logs for errors
+- [ ] Test all Discord commands
+- [ ] Verify price drop detection
+
+---
+
+## Sprint Ceremonies
+
+### Daily Standups (5-10 minutes)
+- What did I complete yesterday?
+- What will I work on today?
+- Any blockers?
+
+### Sprint Planning (2 hours at sprint start)
+- Review sprint goal
+- Break down tasks
+- Estimate effort
+- Commit to deliverables
+
+### Sprint Review/Demo (1 hour at sprint end)
+- Demonstrate working features
+- Gather stakeholder feedback
+- Update product backlog
+
+### Sprint Retrospective (1 hour)
+- What went well?
+- What could improve?
+- Action items for next sprint
+
+---
+
+## Definition of Ready (Before starting a task)
+- [ ] Task clearly defined
+- [ ] Acceptance criteria written
+- [ ] Dependencies identified
+- [ ] Test scenarios outlined
+- [ ] Estimated and sized
+
+## Definition of Done (Before marking task complete)
+- [ ] Code written and reviewed
+- [ ] Unit tests written and passing
+- [ ] Integration tests passing (if applicable)
+- [ ] Documentation updated
+- [ ] No new linting errors
+- [ ] Manually tested
+- [ ] Committed to version control
+- [ ] Deployed to dev environment
+
+---
+
+## Risk Management
+
+### High Priority Risks
+
+**Risk**: Website structure changes breaking scrapers
+- **Mitigation**: Design flexible selectors, implement scraper health checks
+- **Monitoring**: Alert on consecutive scraper failures
+
+**Risk**: Discord rate limiting
+- **Mitigation**: Implement notification queuing, respect rate limits
+- **Monitoring**: Track notification send rates
+
+**Risk**: Database performance degradation
+- **Mitigation**: Proper indexing, cleanup old data, connection pooling
+- **Monitoring**: Query performance metrics
+
+**Risk**: Playwright browser memory leaks
+- **Mitigation**: Proper cleanup, restart browser periodically
+- **Monitoring**: Memory usage tracking
+
+**Risk**: Secrets exposure
+- **Mitigation**: Never commit .env, use environment variables
+- **Monitoring**: Git hooks to prevent secret commits
+
+---
+
+## Success Metrics
+
+### Sprint-level Metrics
+- Velocity (story points completed)
+- Test coverage percentage
+- Bug count
+- Code review turnaround time
+
+### Product Metrics
+- Number of postings scraped per day
+- Notification accuracy (% of new postings caught)
+- Price drop detection accuracy
+- Discord command usage
+- System uptime
+
+### Quality Metrics
+- Test coverage >90%
+- Zero critical security vulnerabilities
+- <5% error rate in scrapers
+- <2 second command response time
+
+---
+
+## Future Enhancements (Post-MVP Backlog)
 
 1. Machine learning for price prediction
 2. Multi-language support
@@ -713,3 +1231,5 @@ mypy==1.7.1
 6. Advanced filtering and saved searches
 7. Price trend analysis and charts
 8. Integration with more car listing platforms
+9. Geo-location based searches
+10. Image similarity detection (find similar cars)
