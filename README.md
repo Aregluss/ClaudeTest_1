@@ -1,96 +1,143 @@
-# Car Scraper - MVP
+# Car Inventory Data Gatherer - v1.0
 
-A simple web scraper for Response Motors inventory listings.
+A Python application for gathering and analyzing car inventory data from automotive websites. This tool helps track vehicle listings, pricing, and availability over time.
 
-## Features
+## Version 1.0 - Features
 
-- Scrapes car listings from responsemotors.com
-- Stores data in CSV format
-- Displays results in terminal
-- Tracks new vs updated listings
-- Shows summary statistics
+- Automated data gathering from Response Motors inventory
+- CSV-based data storage with structured schemas
+- Console-based reporting and statistics
+- Duplicate detection and update tracking
+- Extensible architecture for multiple data sources
 
-## Setup
+## Running Locally
 
-### 1. Install Dependencies
+### Prerequisites
 
-```bash
-# Create virtual environment (recommended)
-python3 -m venv venv
-source venv/bin/activate  # On macOS/Linux
+- Python 3.9 or higher
+- macOS, Linux, or Windows with WSL
+- Internet connection
 
-# Install requirements
-pip install -r requirements.txt
-
-# Install Playwright browsers
-playwright install chromium
-```
-
-### 2. Run the Scraper
+### Quick Start
 
 ```bash
+# 1. Clone the repository
+git clone <your-repo-url>
+cd ClaudeTest_1
+
+# 2. Run the automated setup script
+./setup.sh
+
+# 3. Activate the virtual environment
+source venv/bin/activate
+
+# 4. Run the application
 python main.py
 ```
 
+### Manual Setup (Alternative)
+
+If you prefer manual setup:
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it (macOS/Linux)
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install browser automation tools
+playwright install chromium
+
+# Run the application
+python main.py
+```
+
+## How It Works
+
+1. **Data Collection**: Connects to automotive inventory websites
+2. **Data Extraction**: Gathers vehicle information (make, model, price, mileage, etc.)
+3. **Data Storage**: Saves structured data to CSV format
+4. **Analysis**: Displays summary statistics and trends
+5. **Tracking**: Monitors changes in listings over time
+
 ## Output
 
-The scraper will:
-1. Navigate to the Response Motors inventory page
-2. Extract car listings
-3. Save to `car_postings.csv`
-4. Display results in terminal with statistics
+The application generates:
+- `car_postings.csv` - Structured vehicle data
+- Console reports with statistics (pricing trends, inventory counts)
+- Debug files when needed (`page_source.html`, screenshots)
+
+## Data Schema
+
+Each vehicle record includes:
+- Unique identifier and source URL
+- Vehicle details (make, model, year, mileage)
+- Pricing information
+- Location and description
+- Image URLs
+- Timestamp of data collection
 
 ## Project Structure
 
 ```
 car_scraper/
-├── models/
-│   └── car_posting.py       # CarPosting data model
-├── database/
-│   └── csv_manager.py       # CSV database implementation
-└── scrapers/
-    └── response_motors_scraper.py  # Website scraper
+├── models/          # Data models and validation
+├── database/        # Data persistence layer (CSV)
+├── scrapers/        # Data collection modules
+└── utils/           # Helper utilities
 
-main.py                       # Entry point
-requirements.txt              # Dependencies
-car_postings.csv             # Generated data file
+main.py              # Application entry point
+requirements.txt     # Python dependencies
+setup.sh            # Automated setup script
 ```
 
-## CSV Database
+## Configuration
 
-Data is stored in `car_postings.csv` with the following fields:
-- id, source_url, source_platform
-- title, make, model, year, mileage, price
-- description, location
-- image_urls, thumbnail_url
-- scraped_at, features, condition, vin
+To adjust data collection parameters, edit the relevant configuration in:
+- `car_scraper/scrapers/response_motors_scraper.py`
 
 ## Troubleshooting
 
-### No listings found?
+**No data collected?**
+- Ensure internet connection is active
+- Check that dependencies are installed: `pip list`
+- Verify browser automation is working: `playwright install chromium`
 
-1. Check `page_source.html` (auto-saved on first run)
-2. Run with visible browser to see what happens:
-   ```python
-   # Edit main.py line 63:
-   scraper = ResponseMotorsScraper(headless=False)
-   ```
-3. The website structure may have changed - selectors may need adjustment
+**Permission errors?**
+- Make setup script executable: `chmod +x setup.sh`
+- Ensure write permissions in the project directory
 
-### Adjusting Selectors
+**Import errors?**
+- Activate virtual environment: `source venv/bin/activate`
+- Reinstall dependencies: `pip install -r requirements.txt`
 
-Edit `car_scraper/scrapers/response_motors_scraper.py`:
-- Line 62: Add website-specific selectors to `possible_selectors`
-- Lines 139-147: Adjust field extraction selectors
+## Roadmap
 
-## Future Enhancements
+**v1.0** (Current)
+- ✅ CSV data storage
+- ✅ Response Motors integration
+- ✅ Basic statistics and reporting
 
+**v2.0** (Planned)
 - SQLite database support
 - Discord notifications
-- Multiple website support
-- Scheduled scraping
-- Price change tracking
+- Price change alerts
+- Multiple source support
+
+**v3.0** (Future)
+- Web dashboard
+- Scheduled automation
+- Advanced analytics
+- API endpoints
+
+## License
+
+MIT License - See LICENSE file for details
 
 ---
 
-**Original Project**: ClaudeTest_1 - Testing Claude Code Integration with GH
+*Built with Claude Code*
