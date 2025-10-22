@@ -7,24 +7,22 @@ This is a minimal viable product that gathers data from https://responsemotors.c
 ## Installation (One-time setup)
 
 ```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
 # Option 1: Use the setup script (easiest)
 ./setup.sh
 
 # Option 2: Manual setup
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-playwright install chromium
+uv sync
+uv run playwright install chromium
 ```
 
 ## Running the Data Gatherer
 
 ```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Run the application
-python main.py
+# Run the application with uv
+uv run python main.py
 ```
 
 ## What It Does
@@ -140,11 +138,11 @@ The CSV includes these fields:
 - Update selectors in the gatherer
 
 ### "Module not found" errors
-- Make sure you activated the virtual environment: `source venv/bin/activate`
-- Reinstall dependencies: `pip install -r requirements.txt`
+- Resync dependencies: `uv sync`
+- Check Python version: `python3 --version` (must be 3.12+)
 
 ### Playwright browser not found
-- Run: `playwright install chromium`
+- Run: `uv run playwright install chromium`
 
 ## Next Steps
 

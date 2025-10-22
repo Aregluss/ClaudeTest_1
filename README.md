@@ -15,6 +15,7 @@ A Python application for gathering and analyzing car inventory data from automot
 ### Prerequisites
 
 - Python 3.12 or higher
+- [uv](https://docs.astral.sh/uv/) - Fast Python package installer and resolver
 - macOS, Linux, or Windows with WSL
 - Internet connection
 
@@ -25,14 +26,14 @@ A Python application for gathering and analyzing car inventory data from automot
 git clone <your-repo-url>
 cd ClaudeTest_1
 
-# 2. Run the automated setup script
+# 2. Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 3. Run the automated setup script
 ./setup.sh
 
-# 3. Activate the virtual environment
-source venv/bin/activate
-
 # 4. Run the application
-python main.py
+uv run python main.py
 ```
 
 ### Manual Setup (Alternative)
@@ -40,20 +41,17 @@ python main.py
 If you prefer manual setup:
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Activate it (macOS/Linux)
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Sync dependencies
+uv sync
 
 # Install browser automation tools
-playwright install chromium
+uv run playwright install chromium
 
 # Run the application
-python main.py
+uv run python main.py
 ```
 
 ## How It Works
@@ -92,7 +90,8 @@ inventory_gatherer/
 └── utils/           # Helper utilities
 
 main.py              # Application entry point
-requirements.txt     # Python dependencies
+pyproject.toml       # Python dependencies (managed by uv)
+requirements.txt     # Legacy dependency list
 setup.sh            # Automated setup script
 ```
 
@@ -105,16 +104,16 @@ To adjust data gathering parameters, edit the relevant configuration in:
 
 **No data collected?**
 - Ensure internet connection is active
-- Check that dependencies are installed: `pip list`
-- Verify browser automation is working: `playwright install chromium`
+- Check that dependencies are installed: `uv pip list`
+- Verify browser automation is working: `uv run playwright install chromium`
 
 **Permission errors?**
 - Make setup script executable: `chmod +x setup.sh`
 - Ensure write permissions in the project directory
 
 **Import errors?**
-- Activate virtual environment: `source venv/bin/activate`
-- Reinstall dependencies: `pip install -r requirements.txt`
+- Resync dependencies: `uv sync`
+- Check Python version: `python3 --version` (must be 3.12+)
 
 ## Roadmap
 
