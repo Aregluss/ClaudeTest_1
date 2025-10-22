@@ -5,6 +5,7 @@ A Python-based web gatherer using Playwright to collect car posting data from va
 
 ## Technology Stack
 - **Python 3.12+**: Core programming language
+- **[uv](https://docs.astral.sh/uv/)**: Fast Python package installer and resolver
 - **Playwright**: Web automation and gathering
 - **Discord.py**: Discord bot integration
 - **SQLite/PostgreSQL**: Data storage
@@ -65,7 +66,8 @@ inventory_gatherer/
 │   ├── test_database.py
 │   └── test_discord_bot.py
 ├── main.py                 # Entry point
-├── requirements.txt        # Python dependencies
+├── pyproject.toml          # Project metadata and dependencies (managed by uv)
+├── requirements.txt        # Legacy dependency list
 └── .env                    # Environment variables (git-ignored)
 ```
 
@@ -629,48 +631,41 @@ PRICE_DROP_THRESHOLD_PERCENT=5.0
    - Watch specific postings for changes
    - View statistics and trends
 
-## Dependencies (requirements.txt)
+## Dependencies (pyproject.toml)
 
+Dependencies are managed using [uv](https://docs.astral.sh/uv/), defined in `pyproject.toml`:
+
+```toml
+[project]
+dependencies = [
+    "playwright>=1.40.0",
+    "beautifulsoup4>=4.12.2",
+    "lxml>=4.9.3",
+    "discord.py>=2.3.2",
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.12.1",
+    "psycopg2-binary>=2.9.9",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-dotenv>=1.0.0",
+    "python-dateutil>=2.8.2",
+    "aiohttp>=3.9.1",
+    "loguru>=0.7.2",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-playwright>=0.4.3",
+    "pytest-mock>=3.12.0",
+    "black>=23.11.0",
+    "flake8>=6.1.0",
+    "mypy>=1.7.1",
+]
 ```
-# Web Gathering
-playwright==1.40.0
-beautifulsoup4==4.12.2
-lxml==4.9.3
 
-# Discord Integration
-discord.py==2.3.2
-
-# Database
-sqlalchemy==2.0.23
-alembic==1.12.1
-psycopg2-binary==2.9.9  # For PostgreSQL
-
-# Data Validation
-pydantic==2.5.0
-pydantic-settings==2.1.0
-
-# Configuration
-python-dotenv==1.0.0
-
-# Utilities
-python-dateutil==2.8.2
-aiohttp==3.9.1
-asyncio==3.4.3
-
-# Logging
-loguru==0.7.2
-
-# Testing
-pytest==7.4.3
-pytest-asyncio==0.21.1
-pytest-playwright==0.4.3
-pytest-mock==3.12.0
-
-# Development
-black==23.11.0
-flake8==6.1.0
-mypy==1.7.1
-```
+Install all dependencies with: `uv sync`
 
 ## Testing Strategy
 
@@ -717,27 +712,27 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 **Tasks**:
 - [ ] Initialize Git repository and branch strategy
 - [ ] Set up project structure (directories, `__init__.py` files)
-- [ ] Create `requirements.txt` with initial dependencies
-- [ ] Set up virtual environment
+- [ ] Create `pyproject.toml` with [uv](https://docs.astral.sh/uv/) configuration
+- [ ] Install uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - [ ] Configure `.env.example` and `.gitignore`
 - [ ] Set up pytest configuration
 - [ ] Configure logging framework (loguru)
 - [ ] Set up code formatting (Black) and linting (Flake8, mypy)
 - [ ] Create basic CI/CD pipeline (GitHub Actions)
-- [ ] Install Playwright and run `playwright install`
+- [ ] Install Playwright and run `uv run playwright install`
 
 **Deliverables**:
-- Working development environment
+- Working development environment with uv
 - Executable test suite (even if empty)
 - CI pipeline running on commits
 
 **Testing**:
-- Verify all dependencies install correctly
-- Run `pytest` successfully (with placeholder tests)
+- Verify all dependencies install correctly with `uv sync`
+- Run `uv run pytest` successfully (with placeholder tests)
 - Verify linting and formatting checks pass
 
 **Definition of Done**:
-- Any developer can clone repo and run tests
+- Any developer can clone repo, install uv, and run tests
 - CI pipeline shows green status
 - Documentation on local setup exists
 
@@ -1081,7 +1076,7 @@ The project is broken down into 8 two-week sprints, each with clear deliverables
 
 **Production Readiness Checklist**:
 - [ ] All tests passing (>90% coverage)
-- [ ] No security vulnerabilities
+- [ ] No security vulnerabilities (check with `uv run pip-audit` if available)
 - [ ] Error handling comprehensive
 - [ ] Logging structured and useful
 - [ ] Monitoring dashboards created

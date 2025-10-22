@@ -20,27 +20,23 @@ fi
 echo "✓ Python version $python_version (meets requirement >= 3.12)"
 echo ""
 
-# Check if virtual environment exists
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
-    echo "✓ Virtual environment created"
-else
-    echo "✓ Virtual environment already exists"
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    echo "❌ Error: uv is not installed"
+    echo "   Install uv by running: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    echo "   Or visit: https://docs.astral.sh/uv/getting-started/installation/"
+    exit 1
 fi
-
+echo "✓ uv is installed"
 echo ""
-echo "Activating virtual environment..."
-source venv/bin/activate
 
-echo ""
-echo "Installing Python dependencies..."
-pip install --upgrade pip
-pip install -r requirements.txt
+# Sync dependencies using uv
+echo "Syncing dependencies with uv..."
+uv sync
 
 echo ""
 echo "Installing Playwright browsers..."
-playwright install chromium
+uv run playwright install chromium
 
 echo ""
 echo "================================"
@@ -48,6 +44,5 @@ echo "Setup Complete!"
 echo "================================"
 echo ""
 echo "To run the data gatherer:"
-echo "  source venv/bin/activate"
-echo "  python main.py"
+echo "  uv run python main.py"
 echo ""

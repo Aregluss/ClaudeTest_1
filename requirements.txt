@@ -1,5 +1,9 @@
-# Python Version Requirement
-# This project requires Python 3.12 or higher
+# DEPRECATED: This file is kept for reference only
+# Dependencies are now managed via pyproject.toml using uv
+# Install dependencies with: uv sync
+# See: https://docs.astral.sh/uv/
+#
+# Python Version Requirement: Python 3.12 or higher
 
 # Web Automation
 playwright==1.40.0
